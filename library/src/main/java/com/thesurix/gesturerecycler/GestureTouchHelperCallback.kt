@@ -13,6 +13,10 @@ import com.thesurix.gesturerecycler.LayoutFlags.*
  */
 class GestureTouchHelperCallback(private val gestureAdapter: GestureAdapter<*, *>) : ItemTouchHelper.Callback() {
 
+    interface SwipeListener {
+        fun onSwipe(side: Int, backgroundView: View?, foregroundView: View?)
+    }
+
     /** Flag that enables or disables swipe gesture  */
     var swipeEnabled = false
     /** Flag that enables or disables manual drag gesture  */
@@ -28,6 +32,8 @@ class GestureTouchHelperCallback(private val gestureAdapter: GestureAdapter<*, *
     var dragFlags = ItemTouchHelper.UP or ItemTouchHelper.DOWN
     /** Flags for swipe gesture  */
     var swipeFlags = ItemTouchHelper.RIGHT
+
+    var swipeListener: SwipeListener? = null
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
         val holder = viewHolder as GestureViewHolder<*>
@@ -58,9 +64,15 @@ class GestureTouchHelperCallback(private val gestureAdapter: GestureAdapter<*, *
 
     override fun onChildDraw(c: Canvas, recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, dX: Float, dY: Float,
                              actionState: Int, isCurrentlyActive: Boolean) {
-        when(actionState) {
+        when (actionState) {
             ItemTouchHelper.ACTION_STATE_SWIPE -> {
                 val foregroundView = (viewHolder as GestureViewHolder<*>).foregroundView
+                val backgroundView = (viewHolder as GestureViewHolder<*>).backgroundView
+                when {
+                    dX < 0 -> swipeListener?.onSwipe(ItemTouchHelper.LEFT, backgroundView, foregroundView)
+                    dX > 0 -> swipeListener?.onSwipe(ItemTouchHelper.RIGHT, backgroundView, foregroundView)
+                }
+
                 getDefaultUIUtil().onDraw(c, recyclerView, foregroundView, dX, dY, actionState, isCurrentlyActive)
             }
             else -> super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)

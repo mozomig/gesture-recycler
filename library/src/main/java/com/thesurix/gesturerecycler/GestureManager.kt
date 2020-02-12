@@ -1,5 +1,6 @@
 package com.thesurix.gesturerecycler
 
+import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
@@ -12,6 +13,12 @@ private const val INVALID_FLAG = -1
 class GestureManager {
 
     private val touchHelperCallback: GestureTouchHelperCallback
+
+    var swipeListener: GestureTouchHelperCallback.SwipeListener? = null
+        set(value) {
+            touchHelperCallback.swipeListener = value
+            field = value
+        }
 
     private constructor(builder: Builder) {
         val adapter = builder.recyclerView.adapter as GestureAdapter<Any, *>
